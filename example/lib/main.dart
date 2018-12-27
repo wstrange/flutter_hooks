@@ -1,6 +1,7 @@
 // ignore_for_file: omit_local_variable_types
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,12 +39,18 @@ class _Counter extends HookWidget {
                 ? const CircularProgressIndicator()
                 : GestureDetector(
                     onTap: () => countController.add(count.data + 1),
-                    child: Text('You tapped me ${count.data} times.'),
+                    child: Text('You tapped \n\nme ${count.data} times.'),
                   );
           },
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('foo', 42));
   }
 }
 

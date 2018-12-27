@@ -446,6 +446,11 @@ class _EffectHookState extends HookState<void, _EffectHook> {
   void build(BuildContext context) {}
 
   @override
+  String toStringShort() {
+    return 'useEffect';
+  }
+
+  @override
   void dispose() {
     if (disposer != null) {
       disposer();
@@ -455,6 +460,13 @@ class _EffectHookState extends HookState<void, _EffectHook> {
 
   void scheduleEffect() {
     disposer = hook.effect();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    print(hook.keys);
+    properties.add(ObjectFlagProperty.has('dispose', disposer));
   }
 }
 
@@ -470,6 +482,16 @@ class _StreamControllerHook<T> extends Hook<StreamController<T>> {
   @override
   _StreamControllerHookState<T> createState() =>
       _StreamControllerHookState<T>();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(ObjectFlagProperty.has('onListen', onListen))
+      ..add(ObjectFlagProperty.has('onCancel', onCancel))
+      ..add(
+          FlagProperty(null, value: sync, ifTrue: 'sync', defaultValue: false));
+  }
 }
 
 class _StreamControllerHookState<T>
@@ -500,6 +522,11 @@ class _StreamControllerHookState<T>
   @override
   StreamController<T> build(BuildContext context) {
     return _controller;
+  }
+
+  @override
+  String toStringShort() {
+    return 'useStreamController<$T>';
   }
 
   @override

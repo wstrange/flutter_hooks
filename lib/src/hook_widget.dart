@@ -109,7 +109,7 @@ part of 'hook.dart';
 /// In fact this has secondary bonus: `duration` is kept updated with the latest value.
 /// If we were to pass a variable as `duration` instead of a constant, then on value change the [AnimationController] will be updated.
 @immutable
-abstract class Hook<R> {
+abstract class Hook<R> extends Diagnosticable {
   /// Allows subclasses to have a `const` constructor
   const Hook({this.keys});
 
@@ -180,7 +180,7 @@ abstract class Hook<R> {
 }
 
 /// The logic and internal state for a [HookWidget]
-abstract class HookState<R, T extends Hook<R>> {
+abstract class HookState<R, T extends Hook<R>> extends DiagnosticableTree {
   /// Equivalent of [State.context] for [HookState]
   @protected
   BuildContext get context => _element.context;
@@ -192,23 +192,20 @@ abstract class HookState<R, T extends Hook<R>> {
 
   /// Equivalent of [State.initState] for [HookState]
   @protected
-  @mustCallSuper
   void initHook() {}
 
   /// Equivalent of [State.dispose] for [HookState]
   @protected
-  @mustCallSuper
   void dispose() {}
 
   /// Called everytimes the [HookState] is requested
   ///
-  /// [build] is where an [HookState] may use other hooks. This restriction is made to ensure that hooks are unconditionally always requested
+  /// [build] is where a [HookState] may use other hooks. This restriction is made to ensure that hooks are unconditionally always requested.
   @protected
   R build(BuildContext context);
 
   /// Equivalent of [State.didUpdateWidget] for [HookState]
   @protected
-  @mustCallSuper
   void didUpdateHook(covariant Hook<R> oldHook) {}
 
   /// Equivalent of [State.setState] for [HookState]
@@ -216,6 +213,29 @@ abstract class HookState<R, T extends Hook<R>> {
   void setState(VoidCallback fn) {
     // ignore: invalid_use_of_protected_member
     _element.setState(fn);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (hook != null) {
+      final prettyKeys = <dynamic>[];
+      if (hook.keys != null) {
+        for (final key in hook.keys) {
+          if (key is int ||
+              key is String ||
+              key is double ||
+              key is bool ||
+              key is Diagnosticable) {
+            prettyKeys.add(key);
+          } else {
+            prettyKeys.add(describeIdentity(key));
+          }
+        }
+      }
+      properties.add(IterableProperty<dynamic>('keys', prettyKeys));
+    }
+    hook.debugFillProperties(properties);
   }
 }
 
@@ -382,6 +402,55 @@ This may happen if the call to `Hook.use` is made under some condition.
       .._element = state
       .._hook = hook
       ..initHook();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.properties.removeWhere((n) => n.name == 'state');
+
+    if (_hooks.isNotEmpty) {
+      properties.add(IntProperty('hooks count', _hooks.length));
+    }
+
+    for (final state in _hooks) {
+      properties
+          .add(DiagnosticsProperty<dynamic>(null, state, showName: false));
+    }
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return super.debugDescribeChildren()
+      ..add(DiagnosticsProperty(
+          'hooks',
+          _Tree([
+            DiagnosticsProperty('foo', 24),
+            _Tree([
+              DiagnosticsProperty('foo', 24),
+              DiagnosticsProperty('bar', 24),
+            ]).toDiagnosticsNode(name: 'fo'),
+          ])));
+  }
+}
+
+class _Tree extends DiagnosticableTree {
+  final List<DiagnosticsNode> children;
+
+  _Tree(this.children);
+
+  @override
+  String toStringShort() {
+    return '';
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() => children;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.properties.addAll(children);
   }
 }
 
