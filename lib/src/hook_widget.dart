@@ -218,23 +218,21 @@ abstract class HookState<R, T extends Hook<R>> extends DiagnosticableTree {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (hook != null) {
-      final prettyKeys = <dynamic>[];
-      if (hook.keys != null) {
-        for (final key in hook.keys) {
-          if (key is int ||
-              key is String ||
-              key is double ||
-              key is bool ||
-              key is Diagnosticable) {
-            prettyKeys.add(key);
-          } else {
-            prettyKeys.add(describeIdentity(key));
-          }
+    final prettyKeys = <dynamic>[];
+    if (hook.keys != null) {
+      for (final key in hook.keys) {
+        if (key is int ||
+            key is String ||
+            key is double ||
+            key is bool ||
+            key is Diagnosticable) {
+          prettyKeys.add(key);
+        } else {
+          prettyKeys.add(describeIdentity(key));
         }
       }
-      properties.add(IterableProperty<dynamic>('keys', prettyKeys));
     }
+    properties.add(IterableProperty<dynamic>('keys', prettyKeys));
     hook.debugFillProperties(properties);
   }
 }
@@ -409,29 +407,38 @@ This may happen if the call to `Hook.use` is made under some condition.
     super.debugFillProperties(properties);
     properties.properties.removeWhere((n) => n.name == 'state');
 
-    if (_hooks.isNotEmpty) {
-      properties.add(IntProperty('hooks count', _hooks.length));
-    }
+    final foo = <DiagnosticsNode>[];
 
     for (final state in _hooks) {
-      properties
-          .add(DiagnosticsProperty<dynamic>(null, state, showName: false));
+      foo.add(DiagnosticsProperty(null, state, showName: false));
     }
+    properties.add(
+      _Tree(foo).toDiagnosticsNode(name: 'hooks', style: DiagnosticsTreeStyle.sparse),
+    );
   }
 
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    return super.debugDescribeChildren()
-      ..add(DiagnosticsProperty(
-          'hooks',
-          _Tree([
-            DiagnosticsProperty('foo', 24),
-            _Tree([
-              DiagnosticsProperty('foo', 24),
-              DiagnosticsProperty('bar', 24),
-            ]).toDiagnosticsNode(name: 'fo'),
-          ])));
-  }
+  // if (_hooks.isNotEmpty) {
+  //   properties.add(IntProperty('hooks count', _hooks.length));
+  // }
+  //   for (final state in _hooks) {
+  //     properties
+  //         .add(DiagnosticsProperty<dynamic>(null, state, showName: false));
+  //   }
+  // }
+
+  // @override
+  // List<DiagnosticsNode> debugDescribeChildren() {
+  //   return super.debugDescribeChildren()
+  //     ..add(DiagnosticsProperty(
+  //         'hooks',
+  //         _Tree([
+  //           DiagnosticsProperty('foo', 24),
+  //           _Tree([
+  //             DiagnosticsProperty('foo', 24),
+  //             DiagnosticsProperty('bar', 24),
+  //           ]).toDiagnosticsNode(name: 'fo'),
+  //         ])));
+  // }
 }
 
 class _Tree extends DiagnosticableTree {
