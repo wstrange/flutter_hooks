@@ -1,1 +1,1 @@
-export 'package:flutter_hooks/src/hook.dart';
+export 'package:flutter_hooks/src/framework.dart';

@@ -106,7 +106,7 @@ Widget build(BuildContext context) {
 
 ## Principle
 
-Similarily to `State`, hooks are stored on the `Element` of a `Widget`. But instead of having one `State`, the `Element` stores a `List<Hook>`. Then to use a `Hook`, one must call `Hook.use`.
+Similarly to `State`, hooks are stored on the `Element` of a `Widget`. But instead of having one `State`, the `Element` stores a `List<Hook>`. Then to use a `Hook`, one must call `Hook.use`.
 
 The hook returned by `use` is based on the number of times it has been called. The first call returns the first hook; the second call returns the second hook, the third returns the third hook, ...
 
@@ -292,10 +292,10 @@ The following call to `useEffect` subscribes to a `Stream` and cancel the subscr
 ```dart
 Stream stream;
 useEffect(() {
-    final subscribtion = stream.listen(print);
-    // This will cancel the subscribtion when the widget is disposed
+    final subscription = stream.listen(print);
+    // This will cancel the subscription when the widget is disposed
     // or if the callback is called again.
-    return subscribtion.cancel;
+    return subscription.cancel;
   },
   // when the stream change, useEffect will call the callback again.
   [stream],
@@ -320,6 +320,59 @@ class Counter extends HookWidget {
       child: Text(counter.value.toString()),
     );
   }
+}
+```
+
+- useReducer
+
+An alternative to useState for more complex states.
+
+`useReducer` manages an read only state that can be updated by dispatching actions which are interpreted by a `Reducer`.
+
+The following makes a counter app with both a "+1" and "-1" button:
+
+```dart
+class Counter extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final counter = useReducer(_counterReducer, initialState: 0);
+
+    return Column(
+      children: <Widget>[
+        Text(counter.state.toString()),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => counter.dispatch('increment'),
+        ),
+        IconButton(
+          icon: const Icon(Icons.remove),
+          onPressed: () => counter.dispatch('decrement'),
+        ),
+      ],
+    );
+  }
+
+  int _counterReducer(int state, String action) {
+    switch (action) {
+      case 'increment':
+        return state + 1;
+      case 'decrement':
+        return state - 1;
+      default:
+        return state;
+    }
+  }
+}
+```
+
+- useContext
+
+Returns the `BuildContext` of the currently building `HookWidget`. This is useful when writing custom hooks that want to manipulate the `BuildContext`. 
+
+```dart
+MyInheritedWidget useMyInheritedWidget() {
+  BuildContext context = useContext();
+  return MyInheritedWidget.of(context);
 }
 ```
 
@@ -360,7 +413,7 @@ final colorTween = useValueChanged(
   AlwaysStoppedAnimation(color);
 ```
 
-- useAnimationController, useStreamController, useSingleTickerProvider
+- useAnimationController, useStreamController, useSingleTickerProvider, useValueNotifier
 
 A set of hooks that handles the whole life-cycle of an object. These hooks will take care of both creating, disposing and updating the object.
 
